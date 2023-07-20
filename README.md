@@ -7,6 +7,7 @@ It's Complete Dynamic and Fully Functional Website using PHP prrogramming langua
 4. MySQL Relational Database
 5. payment gateway integration : sslcommerz 
 6. ajax
+7. json
    
 
 
