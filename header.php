@@ -18,7 +18,7 @@
     <?php if(isset($title)){ ?>
         <title><?php echo $title; ?></title>
     <?php }else{ ?>
-        <title>OnlineShop</title>
+        <title>Shop</title>
     <?php } ?>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="css/bootstrap.min.css" />

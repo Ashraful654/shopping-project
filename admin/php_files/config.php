@@ -1,7 +1,8 @@
 <?php
-	include 'database.php';
+	require_once 'database.php';
+     // require_once 'database.php';
   
-     $base_url = "http://localhost/shopping-project/";
+     $base_url = "http://localhost/shoping/";
      
     
 

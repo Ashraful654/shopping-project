@@ -5,7 +5,7 @@ class Database{
 		private $db_host = "localhost";  // Change as required
 		private $db_user = "root";       // Change as required
 		private $db_pass = "";   // Change as required
-		private $db_name = "shopping";   // Change as required
+		private $db_name = "crd";   // Change as required
 
 		private $result = array(); // Any results from a query will be stored here
 		private $mysqli = ""; // This will be our mysqli object
@@ -154,94 +154,93 @@ class Database{
     }else{
     	return false; // Table does not exist
   	}
+	
   }
+
+  // Function to show pagination
+
 
    // FUNCTION to show pagination
-  public function pagination($table, $join = null, $where = null, $limit){
-  	// Check to see if table exists
-  	if($this->tableExists($table)){
-  		//If no limit is set then no pagination is available
-  		if( $limit != null){
-  			// select count() query for pagination
-        $sql = "SELECT COUNT(*) FROM $table";
-        if($where != null){
-      		$sql .= " WHERE $where";
-				}
-				if($join != null){
-					$sql .= ' JOIN '.$join;
-				}
-				// echo $sql; exit;
-        $query = $this->mysqli->query($sql);
-        
-        $total_record = $query->fetch_array();
-        $total_record = $total_record[0];
- 
-        $total_page = ceil( $total_record / $limit);
+   
+// Function to show pagination
+public function pagination($table, $limit, $page, $join = null, $where = null) {
+    // Check to see if table exists
+    if ($this->tableExists($table)) {
+        // If no limit is set then no pagination is available
+        if ($limit !== null && $page !== null) {
+            // Calculate the offset for pagination
+            $start = ($page - 1) * $limit;
 
-        $url = basename($_SERVER['PHP_SELF']);
-
-	        if(isset($_GET["page"])){
-			    	$page = $_GET["page"];
-					}
-					else{
-					  $page = 1;
-					}
-
-        // show pagination
-        $output =   "<ul class='pagination'>";
-        if($page>1){
-            $output .="<li><a href='$url?page=".($page-1)."' class='page-link'>Prev</a></li>";
-        }
-        if($total_record > $limit){
-          for ($i=1; $i<=$total_page ; $i++) {
-            if($i == $page){
-               $cls = "class='active'";
-            }else{
-               $cls = '';
+            // Select count() query for pagination
+            $sql = "SELECT COUNT(*) FROM $table";
+            if ($where !== null) {
+                $sql .= " WHERE $where";
             }
-          	$output .="<li $cls><a class='page-link' href='$url?page=$i'>$i</a></li>";
-          }
-        }
-        if($total_page>$page){
-          $output .="<li> <a class='page-link' href='$url?page=".($page+1)."'>Next</a></li>";
-        }
-        $output .= "</ul>";
+            if ($join !== null) {
+                $sql .= ' JOIN ' . $join;
+            }
 
-        return $output;
-  		}
+            $query = $this->mysqli->query($sql);
 
-  	}else{
-    	return false; // Table does not exist
-  	}
-  }
+            $total_record = $query->fetch_array()[0];
+            $total_page = ceil($total_record / $limit);
+
+            $url = basename($_SERVER['PHP_SELF']);
+
+            // show pagination
+            $output = "<ul class='pagination'>";
+            if ($page > 1) {
+                $output .= "<li><a href='$url?page=" . ($page - 1) . "' class='page-link'>Prev</a></li>";
+            }
+            if ($total_record > $limit) {
+                for ($i = 1; $i <= $total_page; $i++) {
+                    if ($i == $page) {
+                        $cls = "class='active'";
+                    } else {
+                        $cls = '';
+                    }
+                    $output .= "<li $cls><a class='page-link' href='$url?page=$i'>$i</a></li>";
+                }
+            }
+            if ($total_page > $page) {
+                $output .= "<li> <a class='page-link' href='$url?page=" . ($page + 1) . "'>Next</a></li>";
+            }
+            $output .= "</ul>";
+
+            return $output;
+        }
+    } else {
+        return false; // Table does not exist
+    }
+}
 
 	public function sql($sql){
 		$this->myQuery = $sql; // Pass back the SQL
 		$query = $this->mysqli->query($sql);
+	
+    if($query){
+        $sql_array = explode(' ', $sql);
+        switch ($sql_array[0]) {
+            case "INSERT":
+                array_push($this->result, $this->mysqli->insert_id);
+                break;
+            case "UPDATE":
+                array_push($this->result, $this->mysqli->affected_rows);
+                break;
+            case "DELETE":
+                array_push($this->result, $this->mysqli->affected_rows);
+                break;
+            case "SELECT":
+                array_push($this->result, $query->fetch_all(MYSQLI_ASSOC));
+                break;
+        }
+        return true; // Query was successful
+    } else {
+        array_push($this->result, $this->mysqli->error);
+        return false; // No rows were returned or an error occurred
+    }
+}
 
-		if($query){
-      $sql_array = explode(' ',$sql);
-      switch ($sql_array[0]) {
-        case "INSERT":
-          array_push($this->result,$this->mysqli->insert_id);
-          break;
-        case "UPDATE":
-          array_push($this->result,$this->mysqli->affected_rows);
-          break;
-        case "DELETE":
-          array_push($this->result,$this->mysqli->affected_rows);
-          break;
-        case "SELECT":
-          array_push($this->result,$query->fetch_all(MYSQLI_ASSOC));
-          break;
-      }
-			// $this->result = $query->fetch_all(MYSQLI_ASSOC);
-			return true; // Query was successful
-		}else{
-			array_push($this->result,$this->mysqli->error);
-			return false; // No rows where returned
-		}
-	}
 
 	// Private function to check if table exists for use with queries
 	private function tableExists($table){

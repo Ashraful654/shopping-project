@@ -7,7 +7,7 @@ include 'header.php'; ?>
             $limit = 5;
             $db = new Database();
             $db->sql('SELECT order_products.product_id,order_products.order_id,order_products.total_amount,order_products.product_qty,order_products.delivery,order_products.product_user,order_products.order_date,products.featured_image,user.f_name,user.address,user.city,payments.payment_status FROM order_products LEFT JOIN products ON FIND_IN_SET(products.product_id,order_products.product_id) > 0
-                     LEFT JOIN user ON order_products.product_user=user.user_id LEFT JOIN payments ON payments.txn_id = order_products.pay_req_id GROUP BY order_products.order_id ORDER BY order_products.order_id DESC');
+                     LEFT JOIN user ON order_products.product_user=user.user_id LEFT JOIN payments ON payments.txn_id = order_products.pay_req_id    ORDER BY order_products.order_id DESC' );
                 $result = $db->getResult();
                 if(count($result) > 0) {  ?>
                         <table class="table table-striped table-hover table-bordered">

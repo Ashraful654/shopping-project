@@ -6,7 +6,10 @@
     session_unset(); 
     /* destroy the session */
     session_destroy();
-
-mysqli_close($conn);
-header("location:{$base_url}admin/index.php");
+    if ($conn instanceof mysqli) {
+        mysqli_close($conn);
+    }
+    
+    header("location: {$base_url}admin/index.php");
 ?>
+
